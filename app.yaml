@@ -1,5 +1,5 @@
-application: simple-push-demo
-version: v2015-03-12
+application: udacity-simple-push-demo
+version: v2015-09-25
 runtime: python27
 api_version: 1
 threadsafe: yes

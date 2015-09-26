@@ -41,10 +41,10 @@ class SendPushHandler(webapp2.RequestHandler):
       authorization = self.request.get("authorization")
       payload = self.request.get("payload")
       if len(authorization) is 0:
-        authorization = 'AIzaSyBBh4ddPa96rQQNxqiq_qQj7sq1JdsNQUQ';
+        self.response.write('{"success": "false", "message": "requires authorization key"}')
       
       headers = {
-        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        'Content-Type': 'application/json',
         'Authorization': 'key='+authorization
       }
 
@@ -57,19 +57,18 @@ class SendPushHandler(webapp2.RequestHandler):
       logging.info('Endpoint: ' + endpoint)
       logging.info('regId: ' + subscriptionId)
       logging.info('authorization: ' + authorization)
-      logging.info('payload: ' + payload);
+      logging.info('payload: ' + payload)
 
-      form_fields = {
-        "registration_id": subscriptionId,
-        "data": payload
+      json_payload = {
+        "to": subscriptionId,
+        "data": json.loads(payload)
       }
-      form_data = urllib.urlencode(form_fields)
     else :
       logging.info('We don\'t currently support any other endpoints')
       self.response.write('{ "success": false }')
 
     result = urlfetch.fetch(url=endpoint,
-                            payload=form_data,
+                            payload=json.dumps(json_payload),
                             method=urlfetch.POST,
                             headers=headers)
     
