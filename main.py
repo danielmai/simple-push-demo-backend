@@ -34,6 +34,7 @@ class SendPushHandler(webapp2.RequestHandler):
 
     headers = {}
     form_data = None
+    logging.info('endpoint: ' + endpoint)
     if endpoint.startswith('https://android.googleapis.com/gcm/send'):
       logging.info('Handling a GCM request')
 
@@ -41,7 +42,8 @@ class SendPushHandler(webapp2.RequestHandler):
       authorization = self.request.get("authorization")
       payload = self.request.get("payload")
       if len(authorization) is 0:
-        self.response.write('{"success": "false", "message": "requires authorization key"}')
+        self.response.write('Authorization Key required.')
+        return
       
       headers = {
         'Content-Type': 'application/json',
@@ -66,6 +68,7 @@ class SendPushHandler(webapp2.RequestHandler):
     else :
       logging.info('We don\'t currently support any other endpoints')
       self.response.write('{ "success": false }')
+      return
 
     result = urlfetch.fetch(url=endpoint,
                             payload=json.dumps(json_payload),
@@ -74,12 +77,17 @@ class SendPushHandler(webapp2.RequestHandler):
     
     if result.status_code == 200 and not result.content.startswith("Error") :
       logging.info('Successful Request')
-      self.response.write('{ "success": true }')
+      self.response.write('Success!')
     else:
       logging.info('Failed Request')
       logging.info(result.status_code)
       logging.info(result.content)
-      self.response.write('{ "success": false }')
+      message = 'Unsuccessful request.'
+      if result.status_code == 400:
+        message = 'Invalid Registration ID.'
+      elif result.status_code == 401:
+        message = 'Invalid Authorization Key.'
+      self.response.write(message)
 
 app = webapp2.WSGIApplication([
   ('/send_push', SendPushHandler)
