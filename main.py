@@ -79,14 +79,16 @@ class SendPushHandler(webapp2.RequestHandler):
       logging.info('Successful Request')
       self.response.write('Success!')
     else:
-      logging.info('Failed Request')
-      logging.info(result.status_code)
-      logging.info(result.content)
       message = 'Unsuccessful request.'
       if result.status_code == 400:
         message = 'Invalid Registration ID.'
       elif result.status_code == 401:
         message = 'Invalid Authorization Key.'
+
+      logging.error('Failed Request')
+      logging.error(result.status_code)
+      logging.error(result.content)
+      logging.error(message)
       self.response.write(message)
 
 app = webapp2.WSGIApplication([
