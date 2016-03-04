@@ -75,9 +75,18 @@ class SendPushHandler(webapp2.RequestHandler):
                             method=urlfetch.POST,
                             headers=headers)
     
-    if result.status_code == 200 and not result.content.startswith("Error") :
-      logging.info('Successful Request')
-      self.response.write('Success!')
+    if result.status_code == 200:
+      # A response can either have 'success: 1' or 'failure: 1'
+      json_response = json.loads(result.content)
+      if json_response['success']:
+        logging.info('Successful Request')
+      elif json_response['failure']:
+        logging.error('Failed Request')
+        logging.error(result.status_code)
+
+      # Pretty format JSON response
+      pretty_response = json.dumps(json_response, indent=4)
+      self.response.write(pretty_response)
     else:
       message = 'Unsuccessful request.'
       if result.status_code == 400:
